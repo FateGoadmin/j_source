@@ -582,8 +582,12 @@ public abstract class AbstractQueuedSynchronizer
      */
     private Node enq(final Node node) {
         for (;;) {
+            /**
+             * DONE队列For迭代 ， 奇怪的是首节点永远是 刚初始化的节点
+             */
             Node t = tail;
             if (t == null) { // Must initialize
+                // 奇怪的是首节点永远是 刚初始化的节点
                 if (compareAndSetHead(new Node()))
                     tail = head;
             } else {
@@ -602,10 +606,16 @@ public abstract class AbstractQueuedSynchronizer
      * @param mode Node.EXCLUSIVE for exclusive, Node.SHARED for shared
      * @return the new node
      */
+    /**
+     * DONE 初始化等待队列
+     * @param mode
+     * @return
+     */
     private Node addWaiter(Node mode) {
         Node node = new Node(Thread.currentThread(), mode);
         // Try the fast path of enq; backup to full enq on failure
         Node pred = tail;
+        //DONE 普通队列入队+CAS
         if (pred != null) {
             node.prev = pred;
             if (compareAndSetTail(pred, node)) {
@@ -792,7 +802,9 @@ public abstract class AbstractQueuedSynchronizer
      * @param node the node
      * @return {@code true} if thread should block
      */
+
     private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
+        //上一个节点waitStatus永远是0 刚开始
         int ws = pred.waitStatus;
         if (ws == Node.SIGNAL)
             /*
@@ -815,6 +827,7 @@ public abstract class AbstractQueuedSynchronizer
              * need a signal, but don't park yet.  Caller will need to
              * retry to make sure it cannot acquire before parking.
              */
+            //假如我还在等待 则设置上一个节点睡觉 然后 重新自旋1个节点代表1个线程，然后睡觉后无法自我设置
             compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
         }
         return false;
@@ -832,6 +845,7 @@ public abstract class AbstractQueuedSynchronizer
      *
      * @return {@code true} if interrupted
      */
+    //实现锁最重要的功能阻塞
     private final boolean parkAndCheckInterrupt() {
         LockSupport.park(this);
         return Thread.interrupted();
@@ -860,12 +874,20 @@ public abstract class AbstractQueuedSynchronizer
             boolean interrupted = false;
             for (;;) {
                 final Node p = node.predecessor();
+                /**
+                 *             DONE 唤醒上一个节点，假设入队后 前一个线程已经做完，因为再次自我旋转看能不能获得锁，能的话清空队列GC
+                 *             已经明白为什么AQS队列会首节点为废节点 原因如此
+                 */
                 if (p == head && tryAcquire(arg)) {
+                    /**
+                     * 锁竞争完后  设置头节点为空内容节点 此时便会在@hasQueuedPredecessors中的第二种情形只有1个队列
+                     */
                     setHead(node);
                     p.next = null; // help GC
                     failed = false;
                     return interrupted;
                 }
+                //入队后第一次获得所失败 是否应该阻塞 （锁的重要功能），设置上一个节点的锁状态 -1（singal）
                 if (shouldParkAfterFailedAcquire(p, node) &&
                     parkAndCheckInterrupt())
                     interrupted = true;
@@ -1195,6 +1217,11 @@ public abstract class AbstractQueuedSynchronizer
      *        can represent anything you like.
      */
     public final void acquire(int arg) {
+        /**
+         *         DONE tryAccquire 为模板方法 通过CAS修改state来确定自身的锁 是否能成功
+         *         2 addWaiter 初始化等待队列 ，
+         *         selfInterruopt用于中断 而非阻塞
+         */
         if (!tryAcquire(arg) &&
             acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
             selfInterrupt();
@@ -1516,6 +1543,10 @@ public abstract class AbstractQueuedSynchronizer
         Node t = tail; // Read fields in reverse initialization order
         Node h = head;
         Node s;
+        /**
+         * h!=t && h.next =null 说明头正在初始化 而且 尾部还么完成初始化的情，另外释放锁 时 阻塞队列为空节点但 head-tail还没切过来也会有这种情形
+         *
+         */
         return h != t &&
             ((s = h.next) == null || s.thread != Thread.currentThread());
     }

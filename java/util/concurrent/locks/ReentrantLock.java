@@ -243,6 +243,9 @@ public class ReentrantLock implements Lock, java.io.Serializable {
         protected final boolean tryAcquire(int acquires) {
             final Thread current = Thread.currentThread();
             int c = getState();
+            /**
+             * 判断1是否可以枷锁的状态 aqs的voliate state = 0 证明无锁 可以获得
+             */
             if (c == 0) {
                 if (!hasQueuedPredecessors() &&
                     compareAndSetState(0, acquires)) {
@@ -250,8 +253,10 @@ public class ReentrantLock implements Lock, java.io.Serializable {
                     return true;
                 }
             }
+            //DONE 重入代码
             else if (current == getExclusiveOwnerThread()) {
                 int nextc = c + acquires;
+                //DONE 防止溢出
                 if (nextc < 0)
                     throw new Error("Maximum lock count exceeded");
                 setState(nextc);

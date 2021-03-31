@@ -914,6 +914,12 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * state).
      * @return true if successful
      */
+    /**
+     * 线程池通过 ctl以及hashSet来同步线程 1是数量 2是执行类，
+     * @param firstTask
+     * @param core
+     * @return
+     */
     private boolean addWorker(Runnable firstTask, boolean core) {
         retry:
         /**
@@ -934,6 +940,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
             for (;;) {
                 int wc = workerCountOf(c);
+                //第2步比较线程的数量推测使用2从循环的理由是比较数量 比比较状态多吧
                 if (wc >= CAPACITY ||
                     wc >= (core ? corePoolSize : maximumPoolSize))
                     return false;
@@ -1411,7 +1418,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             //if状态 防止线程竞态  因为其他线程可能采用shutdown 所以douleCheck 如果出现这种情形，则关闭
             if (! isRunning(recheck) && remove(command))
                 reject(command);
-            //担心插入队列后 马上改成shutdown 因而进一次检查
+            //DONE 当当前线程为0时才会加入一个null的线程，内部类worker会自行通过takeWork方法获得
             else if (workerCountOf(recheck) == 0)
                 addWorker(null, false);
         }
