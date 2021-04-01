@@ -59,7 +59,7 @@ package java.util;
  *
  * @since 1.5
  * @author Doug Lea
- * @param <E> the type of elements held in this collection
+ * @param <E> the type of elements held in this collection111
  */
 public abstract class AbstractQueue<E>
     extends AbstractCollection<E>
