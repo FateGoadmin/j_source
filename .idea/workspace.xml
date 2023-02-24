@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="6df77992-d7ce-460d-8a0d-ee5a3fbbb27b" name="Changes" comment="sssss">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/com/sun/corba/se/impl/activation/NameServiceStartThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/com/sun/corba/se/impl/activation/NameServiceStartThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/lang/ClassLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/lang/ClassLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/lang/Thread.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/lang/Thread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/lang/reflect/WeakCache.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/lang/reflect/WeakCache.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/util/HashMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/util/HashMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/util/concurrent/locks/Lock.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/util/concurrent/locks/Lock.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/util/concurrent/locks/ReentrantLock.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/util/concurrent/locks/ReentrantLock.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2GFIf2ld5cX97nAFlZ9oRLFcjHu" />
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaMethodFindUsagesOptions.isSearchForTextOccurrences": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "H:/j_source/j_source",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.keymap"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6df77992-d7ce-460d-8a0d-ee5a3fbbb27b" name="Changes" comment="" />
+      <created>1665978008184</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1665978008184</updated>
+      <workItem from="1665978011150" duration="636000" />
+      <workItem from="1665988186537" duration="2019000" />
+      <workItem from="1668409472213" duration="22000" />
+      <workItem from="1668409539543" duration="22000" />
+      <workItem from="1668409594327" duration="1923000" />
+      <workItem from="1668701424539" duration="659000" />
+      <workItem from="1669172234669" duration="4146000" />
+      <workItem from="1669384979250" duration="599000" />
+      <workItem from="1669432158016" duration="2472000" />
+      <workItem from="1676191204734" duration="981000" />
+      <workItem from="1676362172332" duration="4231000" />
+      <workItem from="1676449048124" duration="5623000" />
+      <workItem from="1676790036466" duration="12251000" />
+      <workItem from="1676969997344" duration="1243000" />
+      <workItem from="1677114240461" duration="517000" />
+      <workItem from="1677114874696" duration="6481000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="sssss" />
+    <option name="LAST_COMMIT_MESSAGE" value="sssss" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$PROJECT_DIR$/../../../Program Files/Java/jdk1.8.0_341/jre/lib/rt.jar!/sun/misc/Launcher.class</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

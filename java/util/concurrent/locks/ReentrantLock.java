@@ -240,15 +240,27 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Fair version of tryAcquire.  Don't grant access unless
          * recursive call or no waiters or is first.
          */
+        /**
+         * AQS 模板方法  tryAcqiure是加锁逻辑  由其他子类实现  基类就负责排队以及阻塞 让出cpu
+         *
+         * @param acquires the acquire argument. This value is always the one
+         *        passed to an acquire method, or is the value saved on entry
+         *        to a condition wait.  The value is otherwise uninterpreted
+         *        and can represent anything you like.
+         * @return
+         */
         protected final boolean tryAcquire(int acquires) {
             final Thread current = Thread.currentThread();
             int c = getState();
             /**
              * 判断1是否可以枷锁的状态 aqs的voliate state = 0 证明无锁 可以获得
+             * DONE AQS 基类有两个基础属性 加锁成功 同步资源器 +1 否则-1
+             *
              */
             if (c == 0) {
                 if (!hasQueuedPredecessors() &&
                     compareAndSetState(0, acquires)) {
+                    // 设置当前的锁线程为当前的线程
                     setExclusiveOwnerThread(current);
                     return true;
                 }
@@ -269,6 +281,9 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     /**
      * Creates an instance of {@code ReentrantLock}.
      * This is equivalent to using {@code ReentrantLock(false)}.
+     */
+    /**
+     * DONE默认非公平锁
      */
     public ReentrantLock() {
         sync = new NonfairSync();
@@ -297,6 +312,9 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      * current thread becomes disabled for thread scheduling
      * purposes and lies dormant until the lock has been acquired,
      * at which time the lock hold count is set to one.
+     */
+    /**
+     * DONE 不管ReentrantLcok 还是其他工具类  最终套用AQS 模板方法
      */
     public void lock() {
         sync.lock();

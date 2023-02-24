@@ -398,18 +398,29 @@ public abstract class ClassLoader {
      * @throws  ClassNotFoundException
      *          If the class could not be found
      */
+
+    /**
+     * DONE  模板读取相应的Class
+     * @param name
+     * @param resolve
+     * @return
+     * @throws ClassNotFoundException
+     */
     protected Class<?> loadClass(String name, boolean resolve)
         throws ClassNotFoundException
     {
         synchronized (getClassLoadingLock(name)) {
             // First, check if the class has already been loaded
+            //检查是否已加载 没有 则重新加载
             Class<?> c = findLoadedClass(name);
             if (c == null) {
                 long t0 = System.nanoTime();
                 try {
                     if (parent != null) {
+                        //相亲委派记账
                         c = parent.loadClass(name, false);
                     } else {
+                        //祖父记账
                         c = findBootstrapClassOrNull(name);
                     }
                 } catch (ClassNotFoundException e) {

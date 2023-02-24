@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
+import com.sun.xml.internal.bind.v2.TODO;
 import sun.misc.Unsafe;
 
 /**
@@ -259,6 +261,8 @@ import sun.misc.Unsafe;
  * fire. Because a latch is non-exclusive, it uses the {@code shared}
  * acquire and release methods.
  *
+ *
+ *
  *  <pre> {@code
  * class BooleanLatch {
  *
@@ -285,6 +289,11 @@ import sun.misc.Unsafe;
  *
  * @since 1.5
  * @author Doug Lea
+ */
+
+/**
+ * AQS 根据节点状态有两种同步资源计算规则   1共享锁 state 有限 acqiure 为减 以Semaphore为例
+ * 2.排他锁为家 以ReentranceLock为例
  */
 public abstract class AbstractQueuedSynchronizer
     extends AbstractOwnableSynchronizer
@@ -581,13 +590,17 @@ public abstract class AbstractQueuedSynchronizer
      * @return node's predecessor
      */
     private Node enq(final Node node) {
+        /**
+         * 多线程竞争 最终目的是全解放 因为可通过性数目有限 所以需要循环来控制  下一轮线程数目 DONE
+         */
         for (;;) {
             /**
              * DONE队列For迭代 ， 奇怪的是首节点永远是 刚初始化的节点
              */
             Node t = tail;
             if (t == null) { // Must initialize
-                // 奇怪的是首节点永远是 刚初始化的节点
+                // 奇怪的是首节点永远是 刚初始化的节点（已解决）
+                //AQS队列线程为防止NPE 首节点永远是 初始化节点 唤醒是一个被动操作， 首届点永远是个操作者
                 if (compareAndSetHead(new Node()))
                     tail = head;
             } else {
@@ -615,9 +628,10 @@ public abstract class AbstractQueuedSynchronizer
         Node node = new Node(Thread.currentThread(), mode);
         // Try the fast path of enq; backup to full enq on failure
         Node pred = tail;
-        //DONE 普通队列入队+CAS
+        //DONE 普通队列入队+CAS 有元素的情形
         if (pred != null) {
             node.prev = pred;
+            //CAS操作保持 栈内存以及cpu的缓存可见性 DONE
             if (compareAndSetTail(pred, node)) {
                 pred.next = node;
                 return node;
@@ -650,6 +664,9 @@ public abstract class AbstractQueuedSynchronizer
          * If status is negative (i.e., possibly needing signal) try
          * to clear in anticipation of signalling.  It is OK if this
          * fails or if status is changed by waiting thread.
+         */
+        /**
+         * 首节点变回 初始状态
          */
         int ws = node.waitStatus;
         if (ws < 0)
@@ -691,6 +708,9 @@ public abstract class AbstractQueuedSynchronizer
          */
         for (;;) {
             Node h = head;
+            /**
+             * 共享锁有线程需要唤醒 DONE
+             */
             if (h != null && h != tail) {
                 int ws = h.waitStatus;
                 if (ws == Node.SIGNAL) {
@@ -717,6 +737,7 @@ public abstract class AbstractQueuedSynchronizer
      */
     private void setHeadAndPropagate(Node node, int propagate) {
         Node h = head; // Record old head for check below
+        //搁置 当前线程节点无须排队
         setHead(node);
         /*
          * Try to signal next queued node if:
@@ -734,10 +755,14 @@ public abstract class AbstractQueuedSynchronizer
          * racing acquires/releases, so most need signals now or soon
          * anyway.
          */
+        //DONE 共享模式下的 唤醒其他节点 通过排除头结点 与 doReleaseShare方法 （内有循环自旋）结合
         if (propagate > 0 || h == null || h.waitStatus < 0 ||
             (h = head) == null || h.waitStatus < 0) {
+
+
             Node s = node.next;
             if (s == null || s.isShared())
+                //TODO 不明
                 doReleaseShared();
         }
     }
@@ -804,7 +829,7 @@ public abstract class AbstractQueuedSynchronizer
      */
 
     private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
-        //上一个节点waitStatus永远是0 刚开始
+        //上一个节点waitStatus永远是0 刚开始 DONE
         int ws = pred.waitStatus;
         if (ws == Node.SIGNAL)
             /*
@@ -828,6 +853,7 @@ public abstract class AbstractQueuedSynchronizer
              * retry to make sure it cannot acquire before parking.
              */
             //假如我还在等待 则设置上一个节点睡觉 然后 重新自旋1个节点代表1个线程，然后睡觉后无法自我设置
+            //DONE 这里的 唤醒以及状态是上下步关系 因为是被动操作  只有上一个节点需要唤醒你时 ，你才能安心睡觉 让出cpu
             compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
         }
         return false;
@@ -845,9 +871,13 @@ public abstract class AbstractQueuedSynchronizer
      *
      * @return {@code true} if interrupted
      */
-    //实现锁最重要的功能阻塞
+    //实现锁最重要的功能阻塞 DONE
     private final boolean parkAndCheckInterrupt() {
+        //阻塞的是当前的线程 而非主线程
         LockSupport.park(this);
+        /**
+         * 响应原装线程的Api 兼容C++以及doug li双方的线程调度
+         */
         return Thread.interrupted();
     }
 
@@ -871,6 +901,9 @@ public abstract class AbstractQueuedSynchronizer
     final boolean acquireQueued(final Node node, int arg) {
         boolean failed = true;
         try {
+            /**
+             * 使用for循环  是因为多线程竞争时 CAS可能会失败，因为要重复尝试 避免 第一次失败后 下一轮不能被唤醒
+             */
             boolean interrupted = false;
             for (;;) {
                 final Node p = node.predecessor();
@@ -887,7 +920,9 @@ public abstract class AbstractQueuedSynchronizer
                     failed = false;
                     return interrupted;
                 }
-                //入队后第一次获得所失败 是否应该阻塞 （锁的重要功能），设置上一个节点的锁状态 -1（singal）
+                /**
+                 * DONE  节点需要被唤醒所以是被动操作，所以需要设置上一个节点，然后 设置了才能睡觉
+                 */
                 if (shouldParkAfterFailedAcquire(p, node) &&
                     parkAndCheckInterrupt())
                     interrupted = true;
@@ -1001,12 +1036,14 @@ public abstract class AbstractQueuedSynchronizer
      */
     private void doAcquireSharedInterruptibly(int arg)
         throws InterruptedException {
+        //共享中台 DONE
         final Node node = addWaiter(Node.SHARED);
         boolean failed = true;
         try {
             for (;;) {
                 final Node p = node.predecessor();
                 if (p == head) {
+                    //与排他锁一样 头结点为虚节点时 进行 唤醒 因为共享 资源是相应的减法 所以 有资源 则唤醒其他线程
                     int r = tryAcquireShared(arg);
                     if (r >= 0) {
                         setHeadAndPropagate(node, r);
@@ -1216,11 +1253,25 @@ public abstract class AbstractQueuedSynchronizer
      *        {@link #tryAcquire} but is otherwise uninterpreted and
      *        can represent anything you like.
      */
+
+    /**
+     * 原始模板方法 tryAcqiure 由其他相关子类实现 DONE
+     *
+     *  锁的三要素 1： 多线程的 相关容器  （等待队列）
+     *           2 ： 模拟 多线程 竞争 因为多线程竞争是一个循环的过程（所有线程都要释放）
+     *           3： 多线程竞争需要的睡眠以及唤醒
+     * @param arg
+     */
     public final void acquire(int arg) {
+
+
         /**
          *         DONE tryAccquire 为模板方法 通过CAS修改state来确定自身的锁 是否能成功
          *         2 addWaiter 初始化等待队列 ，
          *         selfInterruopt用于中断 而非阻塞
+         *
+         *         1.tryAcique 尝试获得锁 -》 获得锁不成功  则进入竞争队列
+         *         2.相应的队列唤醒以及阻塞 防止占用cpu
          */
         if (!tryAcquire(arg) &&
             acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
@@ -1285,8 +1336,14 @@ public abstract class AbstractQueuedSynchronizer
      * @return the value returned from {@link #tryRelease}
      */
     public final boolean release(int arg) {
+        /**
+         * 同acquire 一样 tryAcquire 与 tryRelease 是模板方法
+         */
         if (tryRelease(arg)) {
             Node h = head;
+            /**
+             *  存在需要被唤醒的线程 DONE
+             */
             if (h != null && h.waitStatus != 0)
                 unparkSuccessor(h);
             return true;
@@ -1323,11 +1380,19 @@ public abstract class AbstractQueuedSynchronizer
      * you like.
      * @throws InterruptedException if the current thread is interrupted
      */
+    /**
+     * AQS 公平锁竞争 DONE
+     * @param arg
+     * @throws InterruptedException
+     */
     public final void acquireSharedInterruptibly(int arg)
             throws InterruptedException {
         if (Thread.interrupted())
             throw new InterruptedException();
         if (tryAcquireShared(arg) < 0)
+        /**
+         * 假如资源等于0 则入队 DONE
+         */
             doAcquireSharedInterruptibly(arg);
     }
 
@@ -2063,11 +2128,16 @@ public abstract class AbstractQueuedSynchronizer
         public final void await() throws InterruptedException {
             if (Thread.interrupted())
                 throw new InterruptedException();
+            /**
+             * ConditionalObject都有的等待队列 添加 DONE
+             */
             Node node = addConditionWaiter();
+            //DONE 解放锁
             int savedState = fullyRelease(node);
             int interruptMode = 0;
             while (!isOnSyncQueue(node)) {
                 LockSupport.park(this);
+                //@link singal
                 if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
                     break;
             }

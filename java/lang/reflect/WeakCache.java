@@ -123,6 +123,8 @@ final class WeakCache<K, P, V> {
 
         while (true) {
             if (supplier != null) {
+
+
                 // supplier might be a Factory or a CacheValue<V> instance
                 V value = supplier.get();
                 if (value != null) {

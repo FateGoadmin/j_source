@@ -246,6 +246,9 @@ public class HashMap<K,V> extends AbstractMap<K,V>
     /**
      * The load factor used when none specified in constructor.
      */
+    /**
+     * 基础容量 与跳表 有相应的关系 DONE   传说是时间与空间的具体考量
+     */
     static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
     /**
@@ -381,15 +384,18 @@ public class HashMap<K,V> extends AbstractMap<K,V>
 
     /**
      * Returns a power of two size for the given target capacity.
-     * DONE 矿荣成2的N次方最接近数 方便计算
+     * DONE 矿荣成2的N次方最接近数 方便计算  位运算
+     *
      */
     static final int tableSizeFor(int cap) {
+        // >>> 右移补1    得出最大的2的n次幂 -1
         int n = cap - 1;
         n |= n >>> 1;
         n |= n >>> 2;
         n |= n >>> 4;
         n |= n >>> 8;
         n |= n >>> 16;
+
         return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
     }
 
@@ -463,6 +469,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
             throw new IllegalArgumentException("Illegal load factor: " +
                                                loadFactor);
         this.loadFactor = loadFactor;
+
         this.threshold = tableSizeFor(initialCapacity);
     }
 
@@ -700,7 +707,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * @return the table
      */
     /**
-     *DONE hashMap的况容方法
+     *DONE hashMap的 矿容以及 初始化表的结果
      * @return
      */
     final Node<K,V>[] resize() {
@@ -714,22 +721,23 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                 return oldTab;
             }
             /**
-             * done 新容量 新负载因子
+             * DONE 新容量 新负载因子
              */
             else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
                      oldCap >= DEFAULT_INITIAL_CAPACITY)
                 newThr = oldThr << 1; // double threshold
         }
         else if (oldThr > 0) // initial capacity was placed in threshold
-            //非默认来计算的结果
+            //非默认来计算的结果 DONE
             newCap = oldThr;
         else {
-            //默认第一次
+            //默认第一次 DONE
             // zero initial threshold signifies using defaults
             newCap = DEFAULT_INITIAL_CAPACITY;
             newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
         }
         if (newThr == 0) {
+
             float ft = (float)newCap * loadFactor;
             newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
                       (int)ft : Integer.MAX_VALUE);
@@ -753,6 +761,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                     else { // preserve order
                         /**
                          * doNE  通过& 运算 计算 这个桶的列表 分散链表 低的在低位 （0） 高的在高位 拆开远链表
+                         * DONE 位运算十分快
                          */
                         Node<K,V> loHead = null, loTail = null;
                         Node<K,V> hiHead = null, hiTail = null;

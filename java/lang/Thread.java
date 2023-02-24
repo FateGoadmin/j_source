@@ -945,6 +945,10 @@ class Thread implements Runnable {
      * @see #isInterrupted()
      * @revised 6.0
      */
+    /**
+     * 优雅地杀死线程 TODO
+     * @return
+     */
     public static boolean interrupted() {
         return currentThread().isInterrupted(true);
     }
